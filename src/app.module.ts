@@ -1,7 +1,8 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, OnModuleInit } from '@nestjs/common';
 import { MongooseModule, InjectConnection } from '@nestjs/mongoose';
 import { LogsModule } from './logs/logs.module';
 import { GithubModule } from './github/github.module';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { Connection } from 'mongoose';
 
 @Module({
@@ -13,8 +14,13 @@ import { Connection } from 'mongoose';
     GithubModule,
   ],
 })
-export class AppModule implements OnModuleInit {
-  constructor(@InjectConnection() private readonly connection: Connection) {}
+export class AppModule implements NestModule, OnModuleInit {
+  constructor(@InjectConnection() private readonly connection: Connection) {
+  }
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
 
   onModuleInit() {
     this.connection.on('connected', () => {
