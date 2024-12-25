@@ -13,11 +13,8 @@ export class LogsService {
     return createdLog.save();
   }
 
-  async findAll(page: number, limit: number): Promise<{ data: Log[], total: number }> {
-    const total = await this.logModel.countDocuments().exec();
+  async findAll(page: number, limit: number): Promise<Log[]> {
     const skip = (page - 1) * limit;
-    const logs = await this.logModel.find().skip(skip).limit(limit).exec();
-
-    return { data: logs, total };
+    return await this.logModel.find().skip(skip).limit(limit).exec();
   }
 }

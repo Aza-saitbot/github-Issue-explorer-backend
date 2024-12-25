@@ -10,23 +10,17 @@ export class GithubController {
   ) {}
 
   @Get('repos/:owner/:repo/issues')
-  async getIssues(@Param('owner') owner: string, @Param('repo') repo: string) {
-    const issues = await this.githubService.getIssues(owner, repo);
-    await this.logsService.create({ ip: 'user_ip_placeholder', timestamp: new Date(), type: 'get_issues' });
-    return issues;
+  async getIssues(@Param('owner') owner: string, @Param('repo') repo: string,@Query('page') page: number = 1) {
+    return await this.githubService.getIssues(owner, repo, page);
   }
 
-  @Get('repos/:owner/:repo/issues/:issueNumber')
+  @Get('repos/:owner/:repo/issue/:issueNumber')
   async getIssue(@Param('owner') owner: string, @Param('repo') repo: string, @Param('issueNumber') issueNumber: number) {
-    const issue = await this.githubService.getIssue(owner, repo, issueNumber);
-    await this.logsService.create({ ip: 'user_ip_placeholder', timestamp: new Date(), type: 'get_issue' });
-    return issue;
+    return await this.githubService.getIssue(owner, repo, issueNumber);
   }
 
   @Get('search/issues')
   async searchIssues(@Query('q') query: string) {
-    const issues = await this.githubService.searchIssues(query);
-    await this.logsService.create({ ip: 'user_ip_placeholder', timestamp: new Date(), type: 'search_issues' });
-    return issues;
+   return await this.githubService.searchIssues(query);
   }
 }

@@ -8,8 +8,8 @@ export class GithubService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async getIssues(owner: string, repo: string) {
-    const response = await this.httpService.get(`${this.apiUrl}/repos/${owner}/${repo}/issues`).toPromise();
+  async getIssues(owner: string, repo: string, page: number) {
+    const response = await this.httpService.get(`${this.apiUrl}/repos/${owner}/${repo}/issues`, { params: { page } }).toPromise();
     return response.data;
   }
 
