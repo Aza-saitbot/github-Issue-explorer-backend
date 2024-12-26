@@ -1,26 +1,28 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { GithubService } from './github.service';
-import { LogsService } from '../logs/logs.service';
+import { GetIssueDto } from './dto/get-issue.dto';
+import { GetIssuesDto } from './dto/get-issues.dto';
+import { SearchIssuesDto } from './dto/search-issues.dto';
 
-@Controller('github')
+@Controller('issues')
 export class GithubController {
-  constructor(
-    private readonly githubService: GithubService,
-    private readonly logsService: LogsService,
-  ) {}
-
-  @Get('repos/:owner/:repo/issues')
-  async getIssues(@Param('owner') owner: string, @Param('repo') repo: string,@Query('page') page: number = 1) {
-    return await this.githubService.getIssues(owner, repo, page);
+  constructor(private readonly githubService: GithubService) {}
+  @Get('/search')
+  async searchIssues(@Query() dto: SearchIssuesDto) {
+    return await this.githubService.searchIssues(dto);
+  }
+  @Get()
+  async getIssues(@Query() dto: GetIssuesDto) {
+    return await this.githubService.getIssues(dto);
   }
 
-  @Get('repos/:owner/:repo/issue/:issueNumber')
-  async getIssue(@Param('owner') owner: string, @Param('repo') repo: string, @Param('issueNumber') issueNumber: number) {
-    return await this.githubService.getIssue(owner, repo, issueNumber);
+  @Get('/:issueNumber')
+  async getIssue(
+    @Param('issueNumber') issueNumber: number,
+    @Query() dto: GetIssueDto,
+  ) {
+    return await this.githubService.getIssue(issueNumber, dto);
   }
 
-  @Get('search/issues')
-  async searchIssues(@Query('q') query: string) {
-   return await this.githubService.searchIssues(query);
-  }
+
 }
