@@ -1,34 +1,40 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LogsService } from '../logs/logs.service';
+import { Reflector } from '@nestjs/core';
+import { LOG_TYPE_KEY } from '../decorators/log-type.decorator';
+import { Log } from '../logs/schemas/log.schema';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
-  constructor(private readonly logsService: LogsService) {
-  }
+  constructor(
+    private readonly logsService: LogsService,
+    private readonly reflector: Reflector,
+  ) {}
 
   use(req: Request, res: Response, next: () => void) {
-    console.log('req.originalUrl',req.originalUrl)
-    const logType = this.determineLogType(req.originalUrl);
+    res.on('finish', () => {
+      const routeHandler = req.route?.stack?.[0]?.handle || null;
 
-    const logData = {
-      ip: req.ip,
-      dt: new Date(),
-      type: logType,
-    };
+      if (!routeHandler) {
+        return;
+      }
 
-    this.logsService.create(logData)
-      .then(() => next())
-      .catch(err => {
-        console.error('Error logging request:', err);
-        next();
-      });
-  }
+      const logType = this.reflector.get<string>(LOG_TYPE_KEY, routeHandler) || 'unknown';
 
-  private determineLogType(url: string): string {
-    if (/\/github\/repos\/\w+\/\w+\/issues$/.test(url)) return 'get_issues';
-    if (/\/github\/repos\/\w+\/\w+\/issue\/\d+$/.test(url)) return 'get_issue';
-    if (/\/github\/search\/?$/.test(url)) return 'search_issues';
-    return 'unknown';
+      const logData: Log = {
+        ip: req.ip,
+        dt: new Date().toISOString(),
+        type: logType,
+      };
+
+      this.logsService
+        .create(logData)
+        .catch((err) => {
+          console.error('Error logging request:', err);
+        });
+    });
+
+    next();
   }
 }
