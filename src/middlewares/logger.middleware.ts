@@ -20,8 +20,11 @@ export class LoggerMiddleware implements NestMiddleware {
         return;
       }
 
-      const logType = this.reflector.get<string>(LOG_TYPE_KEY, routeHandler) || 'unknown';
+      const logType = this.reflector.get<string>(LOG_TYPE_KEY, routeHandler)
 
+      if (!logType) {
+        return;
+      }
       const logData: Log = {
         ip: req.ip,
         dt: new Date().toISOString(),

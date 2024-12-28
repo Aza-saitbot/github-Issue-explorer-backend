@@ -16,7 +16,17 @@ export class LogsService {
 
   async findAll(dto: GetLogsDto): Promise<Log[]> {
     const { page = 1, limit = 30 } = dto;
-    const skip = (page - 1) * limit;
-    return await this.logModel.find().skip(skip).limit(limit).exec();
+
+    const validatedPage = Math.max(page, 1);
+    const validatedLimit = Math.max(limit, 1);
+
+    const skip = (validatedPage - 1) * validatedLimit;
+    return await this.logModel
+      .find()
+      .skip(skip)
+      .limit(validatedLimit)
+      .select('_id ip dt type')
+      .exec();
   }
+
 }
