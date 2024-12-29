@@ -1,4 +1,4 @@
-import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { LogsService } from './logs.service';
 import { Log } from './schemas/log.schema';
 import { GetLogsDto } from './dto/get-logs.dto';
